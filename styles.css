@@ -1,0 +1,531 @@
+:root {
+  --rosa: #E4007C;
+  --cempasuchil: #FFA400;
+  --turquesa: #00A19A;
+  --turquesa-hondo: #007F7A;
+  --tinta: #3D1A5B;
+  --papel: #FFF6E5;
+  --rojo: #E8412C;
+
+  --borde: clamp(3px, 0.45vw, 5px);
+  --carta-ancho: clamp(120px, 20vw, 250px);
+  --sombra-dura: 6px 6px 0 var(--tinta);
+
+  --letra-rotulo: 'Bungee', 'Arial Black', sans-serif;
+  --letra-sombra: 'Bungee Shade', 'Bungee', 'Arial Black', sans-serif;
+  --letra-texto: 'Baloo 2', 'Trebuchet MS', sans-serif;
+
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  font-family: var(--letra-texto);
+  font-size: 1.125rem;
+  line-height: 1.5;
+  color: var(--tinta);
+  background-color: var(--turquesa);
+  /* Rombos muy sutiles, como un mantel de feria. */
+  background-image:
+    radial-gradient(circle at 50% 38%, rgb(255 255 255 / 0.16), transparent 60%),
+    repeating-linear-gradient(45deg, rgb(0 0 0 / 0.035) 0 14px, transparent 14px 28px),
+    repeating-linear-gradient(-45deg, rgb(0 0 0 / 0.035) 0 14px, transparent 14px 28px);
+  overflow-x: hidden;
+}
+
+button { font: inherit; color: inherit; cursor: pointer; }
+
+:focus-visible {
+  outline: 4px solid var(--cempasuchil);
+  outline-offset: 3px;
+}
+
+/* ---------- encabezado y papel picado ---------- */
+
+.encabezado {
+  position: relative;
+  padding-bottom: 0.5rem;
+  text-align: center;
+}
+
+.papel-picado {
+  display: block;
+  width: 100%;
+  height: clamp(70px, 9vw, 104px);
+}
+
+.titulo {
+  margin: 0.25rem 1rem 0;
+  font-family: var(--letra-rotulo);
+  font-weight: 400;
+  font-size: clamp(1.25rem, 2.6vw, 1.9rem);
+  line-height: 1.1;
+  color: var(--papel);
+  text-shadow: 3px 3px 0 var(--tinta);
+}
+
+/* ---------- tablero ---------- */
+
+.tablero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 2.5vh, 1.75rem);
+  padding: 1rem 16px 1.5rem;
+}
+
+.mesa {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  align-items: center;
+  gap: clamp(0.5rem, 1.6vw, 1.5rem);
+}
+
+.signo {
+  font-family: var(--letra-rotulo);
+  font-size: clamp(2.2rem, 5vw, 4.25rem);
+  line-height: 1;
+  color: var(--papel);
+  text-shadow: 4px 4px 0 var(--tinta);
+}
+
+/* ---------- cartas ---------- */
+
+.carta {
+  width: var(--carta-ancho);
+  aspect-ratio: 5 / 7;
+  perspective: 1100px;
+}
+
+.carta-giro {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 620ms cubic-bezier(.3, 1.35, .5, 1);
+}
+
+.carta.boca-abajo .carta-giro { transform: rotateY(180deg); }
+
+.cara {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border: var(--borde) solid var(--tinta);
+  border-radius: 10px;
+  box-shadow: var(--sombra-dura);
+  overflow: hidden;
+}
+
+.cara-frente {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--papel);
+  padding: 6%;
+  /* Marco interior delgado, como el filete de las cartas impresas. */
+  outline: 2px solid var(--tinta);
+  outline-offset: -11px;
+}
+
+.cara-reverso {
+  transform: rotateY(180deg);
+  background: var(--papel) var(--reverso) center / cover;
+  display: grid;
+  place-items: center;
+}
+
+.esquina {
+  font-family: var(--letra-rotulo);
+  font-size: clamp(1.4rem, 3.2vw, 2.6rem);
+  line-height: 1;
+  color: var(--rosa);
+  padding: 4% 0 0 5%;
+  text-shadow: 2px 2px 0 var(--tinta);
+}
+
+/* La ilustración va en su propio recuadro con filete, como en las cartas impresas. */
+.ilustracion {
+  justify-self: center;
+  align-self: center;
+  width: 100%;
+  max-height: 100%;
+  aspect-ratio: 1;
+  min-height: 0;
+  object-fit: cover;
+  border: 2px solid var(--tinta);
+  border-radius: 4px;
+  margin-bottom: 6%;
+}
+
+.nombre {
+  margin: 0 -6.5% -6.5%;
+  padding: 0.4em 0.3em;
+  background: var(--tinta);
+  color: var(--papel);
+  font-family: var(--letra-rotulo);
+  font-size: clamp(0.62rem, 1.25vw, 1rem);
+  line-height: 1.1;
+  text-align: center;
+  text-wrap: balance;
+  min-height: 2.6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Carta del resultado */
+
+.carta-resultado .cara-frente {
+  grid-template-rows: 1fr auto;
+  background:
+    radial-gradient(circle at 50% 45%, #fff 0 30%, transparent 70%),
+    var(--papel);
+}
+
+.producto {
+  display: grid;
+  place-items: center;
+  font-family: var(--letra-sombra);
+  font-size: clamp(3.3rem, 8.6vw, 6.8rem);
+  line-height: 1;
+  color: var(--rosa);
+}
+
+.nombre-cuenta { font-size: clamp(0.8rem, 1.6vw, 1.3rem); }
+
+.medallon {
+  position: relative;
+  width: 64%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--papel);
+  border: var(--borde) solid var(--tinta);
+  box-shadow: 4px 4px 0 var(--tinta);
+}
+
+.medallon[hidden] { display: none; }
+
+.anillo {
+  position: absolute;
+  inset: 6%;
+  transform: rotate(-90deg);
+}
+
+.anillo circle { fill: none; stroke-width: 9; }
+.anillo-fondo { stroke: rgb(61 26 91 / 0.12); }
+.anillo-avance {
+  stroke: var(--rosa);
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.segundos {
+  font-family: var(--letra-rotulo);
+  font-size: clamp(2rem, 4.6vw, 3.6rem);
+  line-height: 1;
+  color: var(--tinta);
+}
+
+/* Entrada de las cartas al sacar una cuenta nueva */
+.carta.repartida { animation: repartir 420ms cubic-bezier(.2, 1.4, .4, 1); }
+
+@keyframes repartir {
+  from { transform: translateY(-28px) rotate(-5deg); }
+  to   { transform: none; }
+}
+
+/* ---------- textos y botón principal ---------- */
+
+.leyenda {
+  margin: 0;
+  max-width: 34ch;
+  text-align: center;
+  font-weight: 700;
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  color: var(--papel);
+  text-shadow: 0 2px 0 rgb(0 0 0 / 0.18);
+  min-height: 3em;
+  display: grid;
+  place-items: center;
+}
+
+.boton-principal {
+  min-width: min(100%, 15rem);
+  padding: 0.55em 1.6em 0.45em;
+  font-family: var(--letra-rotulo);
+  font-size: clamp(1.3rem, 2.6vw, 1.85rem);
+  line-height: 1.2;
+  color: var(--tinta);
+  background: var(--cempasuchil);
+  border: var(--borde) solid var(--tinta);
+  border-radius: 14px;
+  box-shadow: var(--sombra-dura);
+  transition: transform 90ms ease, box-shadow 90ms ease, background-color 150ms;
+}
+
+.boton-principal:hover { background: #FFB733; }
+
+.boton-principal:active {
+  transform: translate(4px, 4px);
+  box-shadow: 2px 2px 0 var(--tinta);
+}
+
+.boton-principal.esperando { background: var(--papel); }
+
+.atajo {
+  margin: -0.5rem 0 0;
+  font-size: 0.95rem;
+  color: rgb(255 246 229 / 0.85);
+}
+
+@media (hover: none) { .atajo { display: none; } }
+
+/* ---------- barra inferior discreta ---------- */
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 16px 0.9rem;
+  color: var(--papel);
+  font-size: 0.98rem;
+}
+
+.dato { opacity: 0.9; font-weight: 700; }
+.dato:empty { display: none; }
+
+.boton-discreto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  background: rgb(61 26 91 / 0.22);
+  color: var(--papel);
+  border: 2px solid rgb(255 246 229 / 0.45);
+  border-radius: 999px;
+  font-weight: 700;
+  transition: background-color 150ms, border-color 150ms;
+}
+
+.boton-discreto:hover { background: rgb(61 26 91 / 0.38); border-color: var(--papel); }
+
+#boton-ajustes { padding: 0.4rem; }
+#boton-ajustes svg { width: 1.35rem; height: 1.35rem; fill: currentColor; display: block; }
+
+.boton-estudio { margin-left: auto; }
+
+.estudio-icono {
+  width: 0.7rem;
+  height: 0.7rem;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.boton-estudio[aria-pressed="true"] .estudio-icono {
+  clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
+}
+
+.boton-estudio.terminado .estudio-icono {
+  clip-path: polygon(14% 52%, 0 66%, 38% 100%, 100% 22%, 86% 8%, 38% 72%);
+  background: var(--cempasuchil);
+}
+
+.estudio-barra {
+  width: 4.5rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: rgb(255 246 229 / 0.25);
+  overflow: hidden;
+}
+
+.estudio-barra span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--cempasuchil);
+  transition: width 400ms;
+}
+
+/* ---------- diálogos ---------- */
+
+.dialogo {
+  width: min(92vw, 28rem);
+  padding: 1.5rem 1.5rem 1.25rem;
+  color: var(--tinta);
+  background: var(--papel);
+  border: var(--borde) solid var(--tinta);
+  border-radius: 14px;
+  box-shadow: 8px 8px 0 var(--tinta);
+}
+
+.dialogo::backdrop { background: rgb(61 26 91 / 0.55); }
+
+.dialogo h2 {
+  margin: 0 0 1rem;
+  font-family: var(--letra-rotulo);
+  font-weight: 400;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  color: var(--rosa);
+}
+
+.campo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 0.9rem;
+  font-weight: 700;
+}
+
+.campo input[type="number"] {
+  width: 5rem;
+  padding: 0.3rem 0.5rem;
+  font: inherit;
+  text-align: center;
+  color: var(--tinta);
+  background: #fff;
+  border: 3px solid var(--tinta);
+  border-radius: 8px;
+}
+
+.tablas {
+  display: block;
+  border: 0;
+  padding: 0;
+}
+
+.tablas legend { padding: 0; margin-bottom: 0.5rem; }
+
+.tablas-opciones {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.4rem;
+}
+
+.tablas-opciones label {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  font-family: var(--letra-rotulo);
+  font-size: 1.05rem;
+  border: 3px solid var(--tinta);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tablas-opciones input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.tablas-opciones label:has(input:checked) { background: var(--rosa); color: var(--papel); }
+.tablas-opciones label:has(input:focus-visible) { outline: 4px solid var(--cempasuchil); outline-offset: 2px; }
+
+.error { margin: 0.4rem 0 0; color: var(--rojo); font-weight: 700; font-size: 0.95rem; }
+
+.interruptores {
+  display: grid;
+  gap: 0.35rem;
+  margin: 1rem 0 0;
+  font-weight: 700;
+}
+
+.interruptores input { width: 1.15rem; height: 1.15rem; accent-color: var(--rosa); vertical-align: -0.15em; margin-right: 0.35rem; }
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.4rem;
+}
+
+.boton-guardar, .boton-secundario {
+  padding: 0.45rem 1.2rem 0.35rem;
+  font-family: var(--letra-rotulo);
+  font-size: 1rem;
+  border: 3px solid var(--tinta);
+  border-radius: 10px;
+}
+
+.boton-guardar { background: var(--cempasuchil); box-shadow: 3px 3px 0 var(--tinta); }
+.boton-secundario { background: transparent; }
+
+/* overflow visible: si no, el diálogo recorta el canvas de serpentinas que lleva adentro. */
+.dialogo-victoria { text-align: center; overflow: visible; }
+.dialogo-victoria h2 { font-size: 2.4rem; margin-bottom: 0.25rem; }
+.dialogo-victoria p { margin: 0 0 1.1rem; font-weight: 700; font-size: 1.2rem; }
+
+.victoria-ilustracion {
+  width: 70%;
+  margin: -0.5rem auto 0.25rem;
+  display: block;
+  mix-blend-mode: multiply;
+}
+
+/* ---------- serpentinas ---------- */
+
+.serpentinas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ---------- pantallas angostas ---------- */
+
+@media (max-width: 640px) {
+  :root { --carta-ancho: min(38vw, 170px); }
+
+  .tablero { gap: 0.75rem; padding-top: 0.5rem; }
+  .leyenda { min-height: 2.4em; }
+
+  .mesa {
+    grid-template-columns: auto auto auto;
+    grid-template-areas:
+      "a por b"
+      "igual igual igual"
+      "res res res";
+    justify-items: center;
+    row-gap: 0.25rem;
+  }
+
+  .carta[data-pos="a"] { grid-area: a; }
+  .carta[data-pos="b"] { grid-area: b; }
+  .signo-por { grid-area: por; }
+  .signo-igual { grid-area: igual; font-size: 2rem; }
+  .carta-resultado { grid-area: res; --carta-ancho: min(36vw, 160px); }
+
+  .nombre { font-size: 0.62rem; }
+  .barra { justify-content: center; }
+  .boton-estudio { margin-left: 0; }
+}
+
+@media (max-width: 640px) and (max-height: 760px) {
+  .carta-resultado { aspect-ratio: 5 / 5.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carta-giro { transition: none; }
+  .carta.repartida { animation: none; }
+  .boton-principal, .estudio-barra span { transition: none; }
+}
