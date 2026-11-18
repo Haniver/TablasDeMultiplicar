@@ -20,7 +20,7 @@
 
   <main class="tablero" aria-live="polite">
     <div class="mesa">
-      <article class="carta carta-factor" data-pos="a">
+      <article class="carta carta-factor boca-abajo" data-pos="a">
         <div class="carta-giro">
           <div class="cara cara-frente">
             <span class="esquina">?</span>
@@ -33,7 +33,7 @@
 
       <span class="signo signo-por" aria-hidden="true">×</span>
 
-      <article class="carta carta-factor" data-pos="b">
+      <article class="carta carta-factor boca-abajo" data-pos="b">
         <div class="carta-giro">
           <div class="cara cara-frente">
             <span class="esquina">?</span>
@@ -46,10 +46,11 @@
 
       <span class="signo signo-igual" aria-hidden="true">=</span>
 
-      <article class="carta carta-resultado">
+      <article class="carta carta-resultado boca-abajo">
         <div class="carta-giro">
           <div class="cara cara-frente">
             <span class="producto"></span>
+            <span class="frijoles" aria-hidden="true"></span>
             <span class="nombre nombre-cuenta"></span>
           </div>
           <div class="cara cara-reverso" style="--reverso: url('assets/img/reverso.webp')">
@@ -70,14 +71,30 @@
     <button class="boton-principal" id="boton-principal" type="button" aria-describedby="leyenda">
       Sacar cuenta
     </button>
-    <p class="atajo">También puedes usar la barra espaciadora.</p>
+
+    <div class="calificar" id="calificar" hidden>
+      <button class="boton-calificar todavia-no" id="boton-todavia" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a8 8 0 1 0 7.7 10.2l-2.4-.7A5.5 5.5 0 1 1 15.9 8L13 10.9h7V3.9l-2.3 2.3A8 8 0 0 0 12 4Z"/></svg>
+        Todavía no
+      </button>
+      <button class="boton-calificar me-la-se" id="boton-me-la-se" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.2 16.6 4.6 12l-1.8 1.8 6.4 6.4L21.2 8.2l-1.8-1.8z"/></svg>
+        ¡Me la sé!
+      </button>
+    </div>
+
+    <p class="atajo" id="atajo">También puedes usar la barra espaciadora.</p>
   </main>
 
   <footer class="barra">
     <button class="boton-discreto" id="boton-ajustes" type="button" aria-label="Ajustes">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm8.6 4.9-1.9-.4a6.9 6.9 0 0 1-.6 1.5l1.1 1.6-1.6 1.6-1.6-1.1c-.5.3-1 .5-1.5.6l-.4 1.9h-2.2l-.4-1.9a6.9 6.9 0 0 1-1.5-.6l-1.6 1.1-1.6-1.6 1.1-1.6c-.3-.5-.5-1-.6-1.5l-1.9-.4v-2.2l1.9-.4c.1-.5.3-1 .6-1.5L4.8 7.1l1.6-1.6L8 6.6c.5-.3 1-.5 1.5-.6l.4-1.9h2.2l.4 1.9c.5.1 1 .3 1.5.6l1.6-1.1 1.6 1.6-1.1 1.6c.3.5.5 1 .6 1.5l1.9.4v2.2Z"/></svg>
     </button>
-    <span class="dato" id="baraja-info"></span>
+    <button class="boton-discreto boton-jugador" id="boton-jugador" type="button">
+      <span class="punto-nube" id="punto-nube" aria-hidden="true"></span>
+      <span id="jugador-nombre">Jugador</span>
+    </button>
+    <span class="dato" id="pendientes-info"></span>
     <span class="dato" id="racha-info"></span>
     <button class="boton-discreto boton-estudio" id="boton-estudio" type="button" aria-pressed="false">
       <span class="estudio-icono" aria-hidden="true"></span>
@@ -100,6 +117,11 @@
         <input type="number" name="minutos" min="1" max="120" step="1" required>
       </label>
 
+      <label class="campo">
+        <span>Cartas nuevas al día</span>
+        <input type="number" name="nuevas" min="1" max="64" step="1" required>
+      </label>
+
       <fieldset class="campo tablas">
         <legend>Tablas que quieres repasar</legend>
         <div class="tablas-opciones" id="tablas-opciones"></div>
@@ -116,6 +138,51 @@
         <button type="submit" class="boton-guardar" value="guardar">Guardar</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog class="dialogo dialogo-perfil" id="dialogo-perfil" aria-labelledby="perfil-titulo">
+    <h2 id="perfil-titulo">¿Quién va a jugar?</h2>
+    <div class="perfil-lista" id="perfil-lista"></div>
+
+    <form id="form-nuevo" class="form-linea">
+      <label class="campo-texto">
+        <span>Jugador nuevo</span>
+        <input name="nombre" maxlength="30" autocomplete="off" placeholder="Nombre" required>
+      </label>
+      <button class="boton-guardar" type="submit">Empezar</button>
+    </form>
+
+    <form id="form-codigo" class="form-linea">
+      <label class="campo-texto">
+        <span>¿Ya tienes un código de progreso?</span>
+        <input name="codigo" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" required>
+      </label>
+      <button class="boton-secundario" type="submit">Abrir</button>
+    </form>
+    <p class="error" id="error-perfil" hidden></p>
+  </dialog>
+
+  <dialog class="dialogo dialogo-progreso" id="dialogo-progreso" aria-labelledby="progreso-titulo">
+    <h2 id="progreso-titulo" tabindex="-1" autofocus>Progreso</h2>
+    <p class="aviso-codigo" id="aviso-codigo" hidden>Guarda este código. Con él abres el mismo progreso en otro dispositivo, y es lo único que lo protege.</p>
+    <p class="progreso-resumen" id="progreso-resumen"></p>
+    <div class="tablero-progreso" id="tablero-progreso"></div>
+    <ul class="leyenda-progreso">
+      <li><span class="muestra" data-estado="nueva"></span>Sin ver</li>
+      <li><span class="muestra" data-estado="aprendiendo"></span>Aprendiendo</li>
+      <li><span class="muestra" data-estado="en-camino"></span>En camino</li>
+      <li><span class="muestra" data-estado="dominada"></span>Dominada</li>
+    </ul>
+
+    <h3>Código de progreso</h3>
+    <p class="codigo-texto"><code id="progreso-codigo"></code></p>
+    <p class="estado-nube" id="estado-nube"></p>
+
+    <div class="acciones acciones-progreso">
+      <button type="button" class="boton-secundario" id="copiar-enlace">Copiar enlace</button>
+      <button type="button" class="boton-secundario" id="cambiar-jugador">Cambiar de jugador</button>
+      <form method="dialog"><button class="boton-guardar">Cerrar</button></form>
+    </div>
   </dialog>
 
   <dialog class="dialogo dialogo-victoria" id="dialogo-victoria" aria-labelledby="victoria-titulo">

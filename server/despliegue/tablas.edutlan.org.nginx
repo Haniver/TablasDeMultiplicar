@@ -1,0 +1,17 @@
+# API de la Lotería de las tablas. certbot agrega el bloque de HTTPS.
+server {
+    listen 80;
+    listen [::]:80;
+    server_name tablas.edutlan.org;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8010;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        client_max_body_size 300k;
+    }
+
+    location / {
+        return 404;
+    }
+}

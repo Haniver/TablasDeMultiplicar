@@ -1,0 +1,20 @@
+[Unit]
+Description=API de la Loteria de las tablas
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=tablas
+Group=tablas
+WorkingDirectory=/opt/tablas-api/server
+EnvironmentFile=/etc/tablas-api.env
+ExecStart=/usr/bin/node index.mjs
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

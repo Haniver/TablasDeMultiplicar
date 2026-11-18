@@ -1,6 +1,19 @@
-// Lectura y escritura en localStorage que nunca truena (modo privado, almacenamiento bloqueado, etc.).
+// Datos del jugador actual. Viven en memoria, se copian a localStorage
+// (para funcionar sin conexión) y el sincronizador los sube al servidor.
 
-export function leer(clave, defecto) {
+import { datosVacios } from './fusionar.js';
+
+const PREFIJO_DATOS = 'tablas:datos:';
+const CLAVE_PERFILES = 'tablas:perfiles';
+const CLAVE_ACTUAL = 'tablas:perfil-actual';
+
+let token = null;
+let datos = datosVacios();
+const oyentes = new Set();
+
+// ---------- localStorage que nunca truena ----------
+
+function leerLocal(clave, defecto) {
   try {
     const texto = localStorage.getItem(clave);
     return texto ? JSON.parse(texto) : defecto;
@@ -9,13 +22,81 @@ export function leer(clave, defecto) {
   }
 }
 
-export function guardar(clave, valor) {
+function guardarLocal(clave, valor) {
   try {
     localStorage.setItem(clave, JSON.stringify(valor));
   } catch {
-    /* sin almacenamiento: la app sigue funcionando, solo no recuerda */
+    /* sin almacenamiento local: queda la copia del servidor */
   }
 }
+
+// ---------- perfiles recordados en este dispositivo ----------
+
+export function perfilesRecordados() {
+  return leerLocal(CLAVE_PERFILES, []);
+}
+
+export function recordarPerfil(codigo, nombre) {
+  const lista = perfilesRecordados().filter((p) => p.codigo !== codigo);
+  lista.unshift({ codigo, nombre });
+  guardarLocal(CLAVE_PERFILES, lista);
+}
+
+export function perfilGuardadoComoActual() {
+  return leerLocal(CLAVE_ACTUAL, null);
+}
+
+export function abrirPerfil(codigo) {
+  token = codigo;
+  guardarLocal(CLAVE_ACTUAL, codigo);
+  datos = leerLocal(PREFIJO_DATOS + codigo, null) ?? datosVacios();
+}
+
+export function codigoActual() {
+  return token;
+}
+
+// ---------- datos ----------
+
+export function datosActuales() {
+  return datos;
+}
+
+// La usa el sincronizador después de fusionar con el servidor (no avisa a los oyentes).
+export function reemplazarDatos(nuevos) {
+  datos = nuevos;
+  if (token) guardarLocal(PREFIJO_DATOS + token, datos);
+}
+
+export function alCambiarDatos(fn) {
+  oyentes.add(fn);
+}
+
+function huboCambio() {
+  if (token) guardarLocal(PREFIJO_DATOS + token, datos);
+  for (const fn of oyentes) fn();
+}
+
+export function leer(clave, defecto) {
+  const s = datos.secciones[clave];
+  return s ? s.valor : defecto;
+}
+
+export function guardar(clave, valor) {
+  datos.secciones[clave] = { valor, rev: Date.now() };
+  huboCambio();
+}
+
+export function leerTarjeta(clave) {
+  return datos.tarjetas[clave] ?? null;
+}
+
+export function guardarTarjeta(clave, tarjeta) {
+  datos.tarjetas[clave] = tarjeta;
+  huboCambio();
+}
+
+// ---------- fechas ----------
 
 // Fecha local en formato AAAA-MM-DD.
 export function fechaLocal(fecha = new Date()) {
@@ -30,7 +111,10 @@ export function hoy() {
 }
 
 export function ayer() {
-  const f = new Date();
-  f.setDate(f.getDate() - 1);
-  return fechaLocal(f);
+  return sumarDias(hoy(), -1);
+}
+
+export function sumarDias(fechaTexto, dias) {
+  const [a, m, d] = fechaTexto.split('-').map(Number);
+  return fechaLocal(new Date(a, m - 1, d + dias));
 }

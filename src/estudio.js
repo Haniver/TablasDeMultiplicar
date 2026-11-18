@@ -73,7 +73,8 @@ export function crearEstudio({ metaUnidades, unidadMs, alCambiar, alCompletar })
       completar();
       return;
     }
-    if (performance.now() - ultimoGuardado > 5000) persistir();
+    // Cada 30 s basta: cada guardado también se sube al servidor.
+    if (performance.now() - ultimoGuardado > 30000) persistir();
     alCambiar(info());
   }
 

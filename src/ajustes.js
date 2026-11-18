@@ -6,6 +6,7 @@ export const TODAS_LAS_TABLAS = [2, 3, 4, 5, 6, 7, 8, 9];
 const DEFECTO = {
   segundos: 5,
   minutos: 15,
+  nuevas: 8,
   tablas: TODAS_LAS_TABLAS,
   voz: true,
   sonido: true,
@@ -23,6 +24,7 @@ function normalizar(a) {
   return {
     segundos: entero(a.segundos, 2, 30, DEFECTO.segundos),
     minutos: entero(a.minutos, 1, 120, DEFECTO.minutos),
+    nuevas: entero(a.nuevas, 1, 64, DEFECTO.nuevas),
     tablas: tablas.length ? tablas : DEFECTO.tablas,
     voz: a.voz !== false,
     sonido: a.sonido !== false,
@@ -53,6 +55,7 @@ export function montarDialogoAjustes({ dialogo, boton, obtener, alGuardar }) {
     const a = obtener();
     form.segundos.value = a.segundos;
     form.minutos.value = a.minutos;
+    form.nuevas.value = a.nuevas;
     for (const caja of form.querySelectorAll('input[name="tabla"]')) {
       caja.checked = a.tablas.includes(Number(caja.value));
     }
@@ -76,6 +79,7 @@ export function montarDialogoAjustes({ dialogo, boton, obtener, alGuardar }) {
     const nuevos = guardarAjustes({
       segundos: form.segundos.value,
       minutos: form.minutos.value,
+      nuevas: form.nuevas.value,
       tablas,
       voz: form.voz.checked,
       sonido: form.sonido.checked,

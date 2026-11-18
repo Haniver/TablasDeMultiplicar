@@ -1,0 +1,9 @@
+{
+  "name": "tablas-api",
+  "private": true,
+  "type": "module",
+  "description": "API de la Lotería de las tablas (progreso por código)",
+  "dependencies": {
+    "pg": "^8.11.0"
+  }
+}
