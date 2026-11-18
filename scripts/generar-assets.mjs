@@ -168,6 +168,19 @@ function tareaImagen(clave, modelo = MODELO_IMG) {
 }
 
 const SFX = {
+  // Las primeras versiones de "revelar" sonaban a ovación; se piden neutrales y de un segundo.
+  arpa: {
+    duracion: 1,
+    prompt:
+      'a single soft solo harp arpeggio, gentle plucked strings, calm and neutral, studio recording, ' +
+      'no voices, no crowd, no applause, no cheering, no percussion',
+  },
+  acorde: {
+    duracion: 1,
+    prompt:
+      'one soft strummed chord on a nylon-string acoustic guitar, calm and neutral, studio recording, ' +
+      'no voices, no crowd, no applause, no cheering, no percussion',
+  },
   revelar: {
     duracion: 2.5,
     prompt:
@@ -214,6 +227,29 @@ export function enPalabras(n) {
 const mayuscula = (s) => s[0].toUpperCase() + s.slice(1);
 const frasePregunta = (a, b) => `${mayuscula(enPalabras(a))} por ${enPalabras(b)}.`;
 const fraseRespuesta = (a, b) => `${mayuscula(enPalabras(a))} por ${enPalabras(b)}, ${enPalabras(a * b)}.`;
+
+// Mirelo es para efectos de sonido y no sabe tocar instrumentos: para el sonido de revelar
+// se generan piezas cortas con ACE-Step y luego se recorta un acorde de ~1 s con ffmpeg.
+const MUSICA = {
+  arpa:
+    'solo concert harp, sparse gentle ascending arpeggios in C major, each arpeggio followed by a long pause, ' +
+    'calm, clean studio recording, instrumental, no other instruments, no drums',
+  guitarra:
+    'solo nylon-string classical guitar, single soft strummed major chords with long pauses between them, ' +
+    'calm, clean studio recording, instrumental, no other instruments, no drums',
+};
+
+function tareaMusica(clave) {
+  return {
+    taskType: 'audioInference',
+    model: 'runware:ace-step@v1.5-turbo',
+    positivePrompt: MUSICA[clave],
+    duration: 30,
+    steps: 10,
+    settings: { vocalLanguage: 'unknown', bpm: 60 },
+    outputFormat: 'WAV',
+  };
+}
 
 const PRECIO_TTS_CARACTER = 0.000035;
 
@@ -288,11 +324,24 @@ async function etapaVoces(op) {
   await correr('voces', pendientes, 8);
 }
 
+async function etapaMusica(op) {
+  const claves = op.solo ? String(op.solo).split(',') : Object.keys(MUSICA);
+  const variantes = Number(op.variantes ?? 2);
+  const trabajos = [];
+  for (const c of claves) {
+    for (let v = 1; v <= variantes; v++) {
+      trabajos.push({ tarea: tareaMusica(c), destino: path.join(GENERADOS, 'musica', `${c}-${v}.wav`) });
+    }
+  }
+  revisarPresupuesto(trabajos.length * 0.005, 'musica');
+  await correr('musica', trabajos);
+}
+
 const op = args();
-const etapas = { prueba: etapaPrueba, imagenes: etapaImagenes, sfx: etapaSfx, voces: etapaVoces };
+const etapas = { prueba: etapaPrueba, imagenes: etapaImagenes, sfx: etapaSfx, voces: etapaVoces, musica: etapaMusica };
 const etapa = etapas[op.etapa];
 if (!etapa) {
-  console.log('Uso: node scripts/generar-assets.mjs --etapa=prueba|imagenes|sfx|voces [--solo=...] [--voz=...]');
+  console.log('Uso: node scripts/generar-assets.mjs --etapa=prueba|imagenes|sfx|voces|musica [--solo=...] [--voz=...]');
   process.exit(1);
 }
 etapa(op).catch((e) => {
